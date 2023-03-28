@@ -1,5 +1,7 @@
 using blog.Data;
+using blog.Extensions;
 using blog.Models;
+using blog.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,15 +18,15 @@ namespace blog.Controllers
             {
                 var categories = await context.Categories.ToListAsync();
 
-                return Ok(categories);
+                return Ok(new ResultViewModel<List<Category>>(categories));
             }
             catch (DbUpdateException ex)
             {
-                return StatusCode(500, "X001 - Não foi possivel obter as categorias");
+                return StatusCode(500, new ResultViewModel<Category>("X001 - Não foi possivel obter as categorias"));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "S001 - Falha interna no servidor");
+                return StatusCode(500, new ResultViewModel<List<Category>>("S001 - Falha interna no servidor"));
             }
         }
 
@@ -35,44 +37,64 @@ namespace blog.Controllers
             {
                 var category = await context.Categories.FirstOrDefaultAsync(x => x.Id == id);
 
-                return Ok(category);
+                if (category == null)
+                {
+                    return NotFound(new ResultViewModel<Category>("Categoria não encontrada"));
+                }
+
+                return Ok(new ResultViewModel<Category>(category));
             }
             catch (DbUpdateException ex)
             {
-                return StatusCode(500, "X002 - Não foi possivel obter a categoria");
+                return StatusCode(500, new ResultViewModel<List<Category>>("X002 - Não foi possivel obter a categoria"));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "S002 - Falha interna no servidor");
+                return StatusCode(500, new ResultViewModel<List<Category>>("S001 - Falha interna no servidor"));
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostAsync([FromBody] Category category, [FromServices] DataContext context)
+        public async Task<IActionResult> PostAsync([FromBody] CreateCategoryViewModel category, [FromServices] DataContext context)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new ResultViewModel<Category>(ModelState.GetErrors()));
+            }
             try
             {
-                await context.Categories.AddAsync(category);
+                var newCategory = new Category
+                {
+                    Name = category.Name,
+                    Slug = category.Slug
+                };
+
+                await context.Categories.AddAsync(newCategory);
                 await context.SaveChangesAsync();
 
-                return Created($"v1/categories/{category.Id}", category);
+                return Created($"v1/categories/{newCategory.Id}", new ResultViewModel<Category>(newCategory));
             }
             catch (DbUpdateException ex)
             {
-                return StatusCode(500, "X003 - Não foi possivel incluir a categoria");
+                return StatusCode(500, new ResultViewModel<Category>("X003 - Não foi possivel incluir a categoria"));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "S003 - Falha interna no servidor");
+                return StatusCode(500, new ResultViewModel<Category>("S003 - Falha interna no servidor"));
             }
         }
 
         [HttpPut]
-        public async Task<IActionResult> PutAsync([FromBody] Category category, [FromServices] DataContext context)
+        public async Task<IActionResult> PutAsync([FromBody] EditCategoryViewModel category, [FromServices] DataContext context)
         {
             try
             {
                 var existingCategory = await context.Categories.FirstOrDefaultAsync(x => x.Id == category.Id);
+
+                if (existingCategory == null)
+                {
+                    return NotFound(new ResultViewModel<Category>("Categoria não encontrada"));
+                }
 
                 existingCategory.Name = category.Name;
                 existingCategory.Slug = category.Slug;
@@ -80,15 +102,15 @@ namespace blog.Controllers
                 context.Categories.Update(existingCategory);
                 await context.SaveChangesAsync();
 
-                return Ok();
+                return Ok(new ResultViewModel<Category>(existingCategory));
             }
             catch (DbUpdateException ex)
             {
-                return StatusCode(500, "X004 - Não foi possivel alterar a categoria");
+                return StatusCode(500, new ResultViewModel<Category>("X004 - Não foi possivel alterar a categoria"));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "S004 - Falha interna no servidor");
+                return StatusCode(500, new ResultViewModel<Category>("S004 - Falha interna no servidor"));
             }
         }
 
@@ -99,18 +121,23 @@ namespace blog.Controllers
             {
                 var category = await context.Categories.FirstOrDefaultAsync(x => x.Id == id);
 
+                if (category == null)
+                {
+                    return NotFound(new ResultViewModel<Category>("Categoria não encontrada"));
+                }
+
                 context.Categories.Remove(category);
                 await context.SaveChangesAsync();
 
-                return Ok(category);
+                return Ok(new ResultViewModel<Category>(category));
             }
             catch (DbUpdateException ex)
             {
-                return StatusCode(500, "X005 - Não foi possivel deletar a categoria");
+                return StatusCode(500, new ResultViewModel<Category>("X005 - Não foi possivel deletar a categoria"));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "S005 - Falha interna no servidor");
+                return StatusCode(500, new ResultViewModel<Category>("S005 - Falha interna no servidor"));
             }
         }
     }
