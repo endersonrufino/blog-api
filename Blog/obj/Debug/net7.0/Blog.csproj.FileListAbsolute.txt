@@ -70,3 +70,4 @@ C:\Users\Enderson\Documents\GitHub\blog-api\blog\bin\Debug\net7.0\Mono.TextTempl
 C:\Users\Enderson\Documents\GitHub\blog-api\blog\bin\Debug\net7.0\System.CodeDom.dll
 C:\Users\Enderson\documents\github\blog-api\blog\bin\Debug\net7.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\Enderson\documents\github\blog-api\blog\bin\Debug\net7.0\SecureIdentity.dll
+C:\Users\Enderson\documents\github\blog-api\blog\bin\Debug\net7.0\Blog.staticwebassets.runtime.json

@@ -10,13 +10,7 @@ namespace blog.Controllers
 {
     [ApiController]
     public class AccountController : ControllerBase
-    {
-        private readonly TokenService _tokenService;
-        public AccountController(TokenService tokenService)
-        {
-            _tokenService = tokenService;
-        }
-
+    {       
         [HttpPost("v1/login")]
         public async Task<IActionResult> Login(
             [FromServices] TokenService tokenService,
